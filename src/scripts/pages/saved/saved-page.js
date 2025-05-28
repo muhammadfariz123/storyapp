@@ -5,6 +5,8 @@ const SavedPage = {
     return `
       <section class="saved-page">
         <h2>Cerita Tersimpan</h2>
+        <div id="loading" style="display:none;">Memproses...</div>
+        <div id="notification" style="display:none; padding: 10px; margin-bottom: 10px; border-radius: 4px;"></div>
         <div id="stories-list" class="stories-list">
           <p>Memuat cerita...</p>
         </div>
@@ -14,12 +16,27 @@ const SavedPage = {
 
   async afterRender() {
     const container = document.getElementById('stories-list');
+    const loading = document.getElementById('loading');
+    const notification = document.getElementById('notification');
+
+    const showLoading = () => loading.style.display = 'block';
+    const hideLoading = () => loading.style.display = 'none';
+    const showNotification = (message, isSuccess = true) => {
+      notification.style.display = 'block';
+      notification.style.backgroundColor = isSuccess ? '#d4edda' : '#f8d7da';
+      notification.style.color = isSuccess ? '#155724' : '#721c24';
+      notification.textContent = message;
+      setTimeout(() => notification.style.display = 'none', 3000);
+    };
+
     try {
-      // Ambil cerita dari IndexedDB bukan API
+      showLoading();
+
       const stories = await db.getAllStories();
 
       if (!stories || stories.length === 0) {
         container.innerHTML = '<p>Belum ada cerita tersimpan.</p>';
+        hideLoading();
         return;
       }
 
@@ -32,28 +49,31 @@ const SavedPage = {
         </article>
       `).join('');
 
-      // Pasang event listener untuk tombol hapus
+      hideLoading();
+
       container.addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-saved-btn')) {
           const id = e.target.dataset.id;
           if (confirm('Yakin ingin menghapus cerita ini dari simpanan?')) {
             try {
+              showLoading();
               await db.deleteStory(id);
-              // Hapus elemen cerita dari DOM
               const storyElement = e.target.closest('.story-item');
               if (storyElement) storyElement.remove();
-
-              // Jika sudah tidak ada cerita tersimpan, tampilkan pesan
               if (container.children.length === 0) {
                 container.innerHTML = '<p>Belum ada cerita tersimpan.</p>';
               }
+              showNotification('Cerita berhasil dihapus dari simpanan.', true);
             } catch (error) {
-              alert('Gagal menghapus cerita: ' + error.message);
+              showNotification('Gagal menghapus cerita: ' + error.message, false);
+            } finally {
+              hideLoading();
             }
           }
         }
       });
     } catch (error) {
+      hideLoading();
       container.innerHTML = `<p>Terjadi kesalahan: ${error.message}</p>`;
     }
   }

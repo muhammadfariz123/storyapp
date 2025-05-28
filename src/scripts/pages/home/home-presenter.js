@@ -1,5 +1,4 @@
 import Api from '../../utils/api';
-import db from '../../utils/db';
 
 const HomePresenter = {
   async getStories() {
@@ -9,22 +8,22 @@ const HomePresenter = {
 
       const stories = data.listStory;
 
-      // Simpan ke IndexedDB
-      for (const story of stories) {
-        await db.addStory(story); // <- ganti dari db.put() ke db.addStory()
-      }
+      // HAPUS PENYIMPANAN OTOMATIS KE INDEXEDDB
+      // supaya IndexedDB hanya menyimpan yang disimpan user saja
 
       return stories;
     } catch (error) {
-      // Jika gagal ambil dari IndexedDB
+      // Jika offline, ambil dari IndexedDB saja
       console.warn('Offline or API failed. Showing saved data:', error.message);
-      const stories = await db.getAllStories(); // <- ganti dari db.getAll()
-      return stories;
+      // Tetap gunakan db.getAllStories untuk fallback
+      const db = await import('../../utils/db');
+      return await db.default.getAllStories();
     }
   },
 
   async deleteStory(id) {
-    await db.deleteStory(id); // <- ganti dari db.delete()
+    const db = await import('../../utils/db');
+    await db.default.deleteStory(id);
   },
 };
 

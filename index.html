@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><link rel="shortcut icon" href="favicon.png"><link rel="manifest" href="./app.webmanifest"/><title>App</title><script defer="defer" src="app.bundle.js"></script><link href="app.css" rel="stylesheet"></head><body><a href="#main-content" class="skip-link">Skip to main content</a><header><div class="main-header container"><a class="brand-name" href="#/">App</a><nav id="navigation-drawer" class="navigation-drawer"><ul id="nav-list" name="navlist" class="nav-list"><a href="#/home">Home</a> <a href="#/add">Tambah Cerita</a> <a href="#/about">Tentang</a></ul><ul id="navlist-main" name="navlist-main" class="navlist-main"></ul><div id="push-notification-tools" class="push-notification-tools"></div></nav><button id="drawer-button" class="drawer-button">☰</button></div></header><main id="main-content" class="main-content fade" tabindex="-1"></main><script>const mainContent = document.getElementById('main-content');
+    
+      const observer = new MutationObserver(() => {
+        mainContent.classList.remove('show');
+        void mainContent.offsetWidth; // trigger reflow
+        mainContent.classList.add('show');
+      });
+    
+      observer.observe(mainContent, { childList: true, subtree: true });
+    
+      // Tambah class show saat halaman pertama dimuat
+      window.addEventListener('DOMContentLoaded', () => {
+        mainContent.classList.add('show');
+      });</script></body></html>
